@@ -1,0 +1,17 @@
+[configuration]
+
+entry_symbol = "main_library_init"
+compatibility_minimum = "4.2"
+
+[libraries]
+
+macos.debug = "res://bin/Darwin-Universal/libMonkeyRun.debug.dylib"
+macos.release = "res://bin/Darwin-Universal/libMonkeyRun.dylib"
+
+windows.debug.x86_64 = "res://bin/Windows-AMD64/libMonkeyRun.debug.dll"
+windows.release.x86_64 = "res://bin/Windows-AMD64/libMonkeyRun.dll"
+
+linux.debug.x86_64 = "res://bin/Linux-x86_64/libMonkeyRun.debug.so"
+linux.release.x86_64 = "res://bin/Linux-x86_64/libMonkeyRun.so"
+linux.debug.arm64 = "res://bin/Linux-arm64/libMonkeyRun.debug.so"
+linux.release.arm64 = "res://bin/Linux-arm64/libMonkeyRun.so"

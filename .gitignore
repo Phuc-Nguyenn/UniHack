@@ -1,0 +1,10 @@
+# MacOS
+.DS_Store
+
+# Editors
+.vscode/
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+compile_commands.json
