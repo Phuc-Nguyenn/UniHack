@@ -17,9 +17,6 @@ VIDEO_WIDTH = 720
 counter_duck = 0 
 counter_jump = 0
 counter_swing = 0
-stageDuck = None
-stageJump = None
-stageSwing = None
 
 #action status
 in_jump = False
