@@ -30,6 +30,9 @@ inSwing = False
 left_angle = None
 right_angle = None
 
+#other variables
+previousHeight = None
+
 def calculate_angle(a,b,c):
     a = np.array(a) # First
     b = np.array(b) # Mid
@@ -44,8 +47,8 @@ def calculate_angle(a,b,c):
 
 cap = cv2.VideoCapture(0)
 
-shoulderQueue = []
-averageInQueue = None
+jumpHeightQueue = []
+prevJumpHeight = None
 
 with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as pose:   
     while cap.isOpened():
@@ -114,17 +117,24 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
 
             
             nextJumpHeight = int(shoulder_average_height + (shoulder_average_height-hip_average_height)/4)
-            #logic for changing the needed height for the jump, if the change between each frame is big then they are likely jumping
-            #so we shouldn't update the height
-            if len(shoulderQueue) > 0 and nextJumpHeight - shoulderQueue[-1] < (shoulder_average_height-hip_average_height)/6:
-                shoulderQueue.append(shoulderQueue[-1])
-            else:
-                shoulderQueue.append(nextJumpHeight)
             
-            #manage the "queue"
-            if len(shoulderQueue) > 9 :
-                isJumpHeight = shoulderQueue[0]
-                shoulderQueue = shoulderQueue[1 : 9]
+            #if the nextJumpHeight changes too quickly then we know that it is probably a jump
+            if len(jumpHeightQueue) > 2 and abs(nextJumpHeight - prevJumpHeight) > (abs(shoulder_average_height-hip_average_height))/12:
+                #if its a jump then don't update nextJumpHeight
+                jumpHeightQueue.append(jumpHeightQueue[-3])
+                # val = abs(nextJumpHeight - prevJumpHeight)
+                # v2 = abs(shoulder_average_height-hip_average_height)/7
+                # print(str(val) + " " + str(v2) + " jumped so didn't update")
+            else:
+                jumpHeightQueue.append(nextJumpHeight)
+                # print("didn't jump so it should move")
+            prevJumpHeight = nextJumpHeight
+
+            #jumpHeightQueue.append(nextJumpHeight)
+            #manage the "jump height queue" that tells you the threshhold for jumping
+            if len(jumpHeightQueue) > 9 :
+                isJumpHeight = jumpHeightQueue[0]
+                jumpHeightQueue = jumpHeightQueue[1 : 9]
 
             # isJumpHeight = int(sum(shoulderQueue)/len(shoulderQueue))
             #needed height line
