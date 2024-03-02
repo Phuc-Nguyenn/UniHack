@@ -49,13 +49,13 @@ set(LIB_DIR "${CMAKE_SYSTEM_NAME}-${LIB_ARCH}")
 # BUILD_OUTPUT_DIR is where we put the resulting library (in the project bin directory)
 set(BUILD_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/build/")
 
-# set_target_properties(
-#     ${PROJECT_NAME} PROPERTIES
-#     CXX_VISIBILITY_PRESET hidden
-#     VISIBILITY_INLINES_HIDDEN true
-#     RUNTIME_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}/${LIB_DIR}"
-#     LIBRARY_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}/${LIB_DIR}"
-# )
+set_target_properties(
+    ${PROJECT_NAME} PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN true
+    RUNTIME_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}/${LIB_DIR}"
+    LIBRARY_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}/${LIB_DIR}"
+)
 
 if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
     set_target_properties(
@@ -68,8 +68,6 @@ add_subdirectory(src)
 
 # Install the library, extension file, and support files in INSTALL_DIR
 set(INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/project/bin")
-
-message(INFO "INSTALL DIR: ${INSTALL_DIR}")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_DIR}/${LIB_DIR})
 
