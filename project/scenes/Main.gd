@@ -4,20 +4,20 @@ var croc_scene = preload("res://scenes/crocodile.tscn")
 var spike_scene = preload("res://scenes/spikes.tscn")
 var eagle_scene = preload("res://scenes/bird.tscn")
 var obstacle_types = [croc_scene, spike_scene]
-var obstacles : Array
+var obstacles: Array
 var eagle_heights = [300, 420]
 
 const MONKEY_START_POS = Vector2i(150, 485)
 const CAM_START_POS = Vector2i(576, 284)
 
-var speed : float
-var screen_size : Vector2i
-var score : int
+var speed: float
+var screen_size: Vector2i
+var score: int
 var time_out = 1
 var time = time_out
 var player_on_camera = false
 var last_obstacle
-var ground_height : int
+var ground_height: int
 var distance = 0
 var last_obs_time = 0
 var obs_timeout = 5
@@ -61,8 +61,8 @@ func _process(delta):
 	if player_on_camera:
 		speed = START_SPEED + score / 10
 		
-		if speed > MAX_SPEED:
-			speed = MAX_SPEED
+		# limit speed to MAX_SPEED
+		speed = min(speed, MAX_SPEED)
 		
 		# generate obstacles
 		last_obs_time -= delta
@@ -87,13 +87,12 @@ func _process(delta):
 			time = time_out
 			score += 1
 			show_score()
-			
-		difficulty += score / 20
-		if difficulty > max_difficulty:
-			difficulty = max_difficulty
-			
 		
-		# if ground finished
+		# update difficulty
+		difficulty += score / 20
+		difficulty = min(max_difficulty, difficulty)
+		
+		# if ground is finished
 		if $Camera2D.position.x - $ground.position.x > screen_size.x * 1.5:
 			$ground.position.x += screen_size.x
 	else:
@@ -141,10 +140,3 @@ func game_over():
 	
 	# might have to be changed
 	player_on_camera = false;
-	
-
-
-
-
-
-
