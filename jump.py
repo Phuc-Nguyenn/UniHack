@@ -25,6 +25,10 @@ inJump = False
 inDuck = False
 inSwing = False
 
+#angle
+left_angle = None
+right_angle = None
+
 def calculate_angle(a,b,c):
     a = np.array(a) # First
     b = np.array(b) # Mid
@@ -81,11 +85,25 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             right_elbow = [landmarks[13].x,landmarks[13].y]
             left_elbow = [landmarks[14].x,landmarks[14].y]
 
+            
+
+            
+
             #changing decimals to coordinates
             right_shoulder_coords = [int(right_shoulder[0]*image_width), int(right_shoulder[1]*image_height)]
             left_shoulder_coords = [int(left_shoulder[0]*image_width), int(left_shoulder[1]*image_height)]
             right_hip_coords = [int(right_hip[0]*image_width), int(right_hip[1]*image_height)]
             left_hip_coords = [int(left_hip[0]*image_width), int(left_hip[1]*image_height)]
+            right_elbow_coords = [int(right_elbow[0]*image_width), int(right_elbow[1]*image_height)]
+            left_elbow_coords = [int(left_elbow[0]*image_width), int(left_elbow[1]*image_height)]
+
+            #angle
+            left_angle = calculate_angle(left_elbow_coords, left_shoulder_coords, left_hip_coords)
+            right_angle = calculate_angle(right_elbow_coords, right_shoulder_coords, right_hip_coords)
+            print("left angle: " + str(left_angle) +  "\n")
+            # #print("\n")
+            print("right angle: " + str(right_angle) + "\n")
+
 
             #averages
             shoulder_average_height = int((right_shoulder_coords[1] + left_shoulder_coords[1])/2)
@@ -121,6 +139,14 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
                 inJump = True
             elif shoulder_average_height > isJumpHeight:
                 inJump = False
+
+            #logic for a swing 
+            if right_angle > 120 and left_angle > 120 and inSwing == False:
+                counterSwing += 1
+                inSwing = True
+            elif right_angle < 120 and left_angle < 120: 
+                inSwing = False 
+            
             
         except:
             pass
