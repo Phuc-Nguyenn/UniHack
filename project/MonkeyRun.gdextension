@@ -8,8 +8,8 @@ compatibility_minimum = "4.2"
 macos.debug = "res://bin/Darwin-Universal/libMonkeyRun.debug.dylib"
 macos.release = "res://bin/Darwin-Universal/libMonkeyRun.dylib"
 
-windows.debug.x86_64 = "res://bin/Windows-AMD64/libMonkeyRun.debug.dll"
-windows.release.x86_64 = "res://bin/Windows-AMD64/libMonkeyRun.dll"
+windows.debug.x86_64 = "res://bin/Windows-AMD64/MonkeyRun.debug.dll"
+windows.release.x86_64 = "res://bin/Windows-AMD64/MonkeyRun.dll"
 
 linux.debug.x86_64 = "res://bin/Linux-x86_64/libMonkeyRun.debug.so"
 linux.release.x86_64 = "res://bin/Linux-x86_64/libMonkeyRun.so"
