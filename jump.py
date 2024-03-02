@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time 
+import pyautogui
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -136,6 +137,7 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             #logic for a jump
             if shoulder_average_height < isJumpHeight and inJump == False:
                 counterJump += 1
+                pyautogui.press('space')
                 inJump = True
             elif shoulder_average_height > isJumpHeight:
                 inJump = False
@@ -144,6 +146,7 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             if right_angle > 120 and left_angle > 120 and inSwing == False:
                 counterSwing += 1
                 inSwing = True
+                pyautogui.press('right')
             elif right_angle < 120 and left_angle < 120: 
                 inSwing = False 
             
