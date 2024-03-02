@@ -93,10 +93,10 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6qg5f"]
-size = Vector2(40, 52)
+size = Vector2(36, 52)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8m434"]
-size = Vector2(40, 24)
+size = Vector2(36, 24)
 
 [node name="Monkey" type="CharacterBody2D"]
 z_index = 1
@@ -107,14 +107,15 @@ script = ExtResource("1_hw57b")
 texture_filter = 1
 scale = Vector2(1.2, 1.2)
 sprite_frames = SubResource("SpriteFrames_8sy8q")
-animation = &"ducking"
+animation = &"running"
 autoplay = "running"
-frame_progress = 0.98115
+frame_progress = 0.669101
 
 [node name="Running-CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(4, -2)
+position = Vector2(6, -2)
 shape = SubResource("RectangleShape2D_6qg5f")
 
 [node name="Ducking-CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(4, 12)
+texture_filter = 1
+position = Vector2(6, 12)
 shape = SubResource("RectangleShape2D_8m434")
