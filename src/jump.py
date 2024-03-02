@@ -35,7 +35,7 @@ cap = cv2.VideoCapture(0)
 
 
 # Set the desired width and height
-new_width = 
+new_width = 480
 new_height = 720
 
 if cap.isOpened():

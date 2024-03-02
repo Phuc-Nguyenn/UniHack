@@ -9,8 +9,7 @@ mp_pose = mp.solutions.pose
 
 ### CONSTANTS 
 video_height = 720
-video_width = 480
-
+video_width = 720
 
 
 #Counter variables
@@ -20,6 +19,11 @@ counterSwing = 0
 stageDuck = None
 stageJump = None
 stageSwing = None
+
+#action status
+inJump = False
+inDuck = False
+inSwing = False
 
 def calculate_angle(a,b,c):
     a = np.array(a) # First
@@ -35,6 +39,7 @@ def calculate_angle(a,b,c):
 
 cap = cv2.VideoCapture(0)
 
+shoulderQueue = []
 
 with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as pose:   
     while cap.isOpened():
@@ -42,7 +47,7 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
         ret, frame = cap.read()
         
         #Crop the video capture: 
-        frame = frame[0:720, 360:840]
+        # frame = frame[0:720, 0:720]
 
         
         # Recolor image to RGB
@@ -75,62 +80,42 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             right_elbow = [landmarks[13].x,landmarks[13].y]
             left_elbow = [landmarks[14].x,landmarks[14].y]
 
+            #changing decimals to coordinates
+            right_shoulder_coords = [int(right_shoulder[0]*image_width), int(right_shoulder[1]*image_height)]
+            left_shoulder_coords = [int(left_shoulder[0]*image_width), int(left_shoulder[1]*image_height)]
+            right_hip_coords = [int(right_hip[0]*image_width), int(right_hip[1]*image_height)]
+            left_hip_coords = [int(left_hip[0]*image_width), int(left_hip[1]*image_height)]
 
-            #Get the distance between shoulder and hip 
-            hip_shoulder_distance = (right_shoulder[1] - right_hip[1] + left_shoulder[1] - left_hip[1]) / 2
+            shoulder_average_height = int((right_shoulder_coords[1] + left_shoulder_coords[1])/2)
+            hip_average_height = int((right_hip_coords[1] + left_hip_coords[1])/2)
+            torsoCenter = [int((right_shoulder_coords[0]+left_shoulder_coords[0]+right_hip_coords[0]+left_hip_coords[0])/4),
+                           int((right_shoulder_coords[1]+left_shoulder_coords[1]+right_hip_coords[1]+left_hip_coords[1])/4)]
 
-            ## Coordinates in the main image: 
-            right_shoulder_point = (int(right_shoulder[0] * image_width), int(right_shoulder[1] * image_height))
-            left_shoulder_point = (int(left_shoulder[0] * image_width), int(left_shoulder[1] * image_height))
-
-            #Shoulder line 
-            cv2.line(image, (0, 210), (480, 210), (255, 0, 0), 2)
-            #Jump line
-            cv2.line(image, (0, 90), (480, 90), (255, 255, 0), 2)
-            #Duck line
-            cv2.line(image, (0, 300), (480, 300), (255, 0, 255), 2)
             
+            shoulderQueue.append(int(shoulder_average_height + (shoulder_average_height-hip_average_height)/3))
+            #manage the "queue"
+            if len(shoulderQueue) > 9 : 
+                isJumpHeight = shoulderQueue[0]
+                shoulderQueue = shoulderQueue[1 : 9]
 
-            # Calculate angle
-            angleSwingRight = calculate_angle(right_elbow, right_shoulder, left_shoulder)
-            angleSwingLeft = calculate_angle(left_elbow, left_shoulder, right_shoulder)
-            print(angleSwingRight)
+            #needed height line
+            cv2.line(image, (0, isJumpHeight), (1080, isJumpHeight), (255,0,0), 2)
+            #shoulder line
+            cv2.line(image, (0, shoulder_average_height), (1080, shoulder_average_height), (255,0,0), 2)
+            # hip line
+            cv2.line(image, (0, hip_average_height), (1080, hip_average_height), (255,0,0), 2)
 
-
-
-            ### LOGIC ###
-            # Logic for ducking
-            if right_shoulder[1] * video_height > 300: 
-                stageDuck = "down"
-            if stageDuck == "down": 
-                #time.sleep(2)
-                stageDuck = "up"
-                counterDuck += 1
-
-            # Logic for jumping
-            if right_shoulder[1] * video_height < 90: 
-                stageJump = "above"
-            if stageJump == "above": 
-                #time.sleep(0.1)
-                stageJump = "back"
+            #logic for a jump
+            if shoulder_average_height < isJumpHeight and inJump == False:
                 counterJump += 1
+                inJump = True
+            elif shoulder_average_height > isJumpHeight:
+                inJump = False
             
-
-            #Logic for swinging 
-            if angleSwingLeft < 100 and angleSwingRight < 100: 
-                stageSwing = "swing"
-            if stageSwing == "swing":
-                counterSwing += 1
-                #time.sleep(0.05)
-                stageSwing = "back"
-
-
-        ### DEBUG ###
-        #print(hip_shoulder_distance) 
         except:
             pass
         
-
+		
 
         ### DISPLAYING ###
         # Setup status box
@@ -156,10 +141,7 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
         cv2.putText(image, str(counterSwing), 
                     (190,60), 
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 2, cv2.LINE_AA)
-
-        
-        
-        
+   
         # Render detections
         mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
                                 mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2), 
