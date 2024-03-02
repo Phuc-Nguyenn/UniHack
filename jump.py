@@ -40,6 +40,7 @@ def calculate_angle(a,b,c):
 cap = cv2.VideoCapture(0)
 
 shoulderQueue = []
+averageInQueue = None
 
 with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as pose:   
     while cap.isOpened():
@@ -86,18 +87,27 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             right_hip_coords = [int(right_hip[0]*image_width), int(right_hip[1]*image_height)]
             left_hip_coords = [int(left_hip[0]*image_width), int(left_hip[1]*image_height)]
 
+            #averages
             shoulder_average_height = int((right_shoulder_coords[1] + left_shoulder_coords[1])/2)
             hip_average_height = int((right_hip_coords[1] + left_hip_coords[1])/2)
             torsoCenter = [int((right_shoulder_coords[0]+left_shoulder_coords[0]+right_hip_coords[0]+left_hip_coords[0])/4),
                            int((right_shoulder_coords[1]+left_shoulder_coords[1]+right_hip_coords[1]+left_hip_coords[1])/4)]
 
             
-            shoulderQueue.append(int(shoulder_average_height + (shoulder_average_height-hip_average_height)/3))
+            nextJumpHeight = int(shoulder_average_height + (shoulder_average_height-hip_average_height)/4)
+            #logic for changing the needed height for the jump, if the change between each frame is big then they are likely jumping
+            #so we shouldn't update the height
+            if len(shoulderQueue) > 0 and nextJumpHeight - shoulderQueue[-1] < (shoulder_average_height-hip_average_height)/6:
+                shoulderQueue.append(shoulderQueue[-1])
+            else:
+                shoulderQueue.append(nextJumpHeight)
+            
             #manage the "queue"
-            if len(shoulderQueue) > 9 : 
+            if len(shoulderQueue) > 9 :
                 isJumpHeight = shoulderQueue[0]
                 shoulderQueue = shoulderQueue[1 : 9]
 
+            # isJumpHeight = int(sum(shoulderQueue)/len(shoulderQueue))
             #needed height line
             cv2.line(image, (0, isJumpHeight), (1080, isJumpHeight), (255,0,0), 2)
             #shoulder line
