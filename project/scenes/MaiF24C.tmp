@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://bca3ksatj4dql"]
+
+[ext_resource type="PackedScene" uid="uid://b12s7gqpkancb" path="res://scenes/background.tscn" id="1_qcygb"]
+[ext_resource type="PackedScene" uid="uid://vdqyyf1wyvxo" path="res://scenes/ground.tscn" id="2_t7k6j"]
+[ext_resource type="PackedScene" uid="uid://wxge2retj3f2" path="res://scenes/monkey.tscn" id="3_bcemo"]
+
+[node name="Main" type="Node"]
+
+[node name="Background" parent="." instance=ExtResource("1_qcygb")]
+
+[node name="ground" parent="." instance=ExtResource("2_t7k6j")]
+
+[node name="Monkey" parent="." instance=ExtResource("3_bcemo")]
+position = Vector2(96, 520)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(576, 324)
