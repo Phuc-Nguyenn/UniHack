@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3 uid="uid://d2cjw2rx3l3gn"]
+
+[ext_resource type="Texture2D" uid="uid://d24sbki0we0dh" path="res://assets/crocodile/Water.png" id="1_6kgkd"]
+[ext_resource type="Texture2D" uid="uid://corp7dkad20wo" path="res://assets/crocodile/CrocodileClosed.png" id="2_kfaet"]
+[ext_resource type="Texture2D" uid="uid://b4y0ho41b1qbp" path="res://assets/crocodile/CrocodileOpen.png" id="3_p0jm4"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eamyh"]
+atlas = ExtResource("2_kfaet")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kkvh7"]
+atlas = ExtResource("3_p0jm4")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pl5v1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eamyh")
+}],
+"loop": true,
+"name": &"closed",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kkvh7")
+}],
+"loop": true,
+"name": &"open",
+"speed": 5.0
+}]
+
+[node name="crocodile" type="Area2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, 24)
+texture = ExtResource("1_6kgkd")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_pl5v1")
+animation = &"open"
+autoplay = "open"
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-16, -24, -8, -24, 0, -16, 8, -24, 24, -24, 24, -24, 24, -24, 24, -24, 24, -16, 16, 0, 16, 16, 16, 24, 8, 24, 8, 24, 8, 24, 8, 24, 0, 24, -8, 24, -8, 24, -16, 24, -16, 16, -16, 16, -16, 16, -16, 8, -24, -8, -24, -8, -24, -16, -24, -16, -24, -24, -24, -24, -16, -24, -8, -24)
