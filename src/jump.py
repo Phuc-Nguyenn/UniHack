@@ -1,58 +1,60 @@
 import cv2
 import mediapipe as mp
 import numpy as np
+import time 
+import pyautogui
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 
 ### CONSTANTS 
-ratio = 0.1 #The ratio of shoulder and hip distance 
-shoulder_y_value = []
+VIDEO_HEIGHT = 720
+VIDEO_WIDTH = 720
 
 
-# Curl counter variables
-counterDuck = 0 
-counterJump = 0
-counterSwing = 0
-stageSquat = None
+#Counter variables
+counter_duck = 0 
+counter_jump = 0
+counter_swing = 0
+stageDuck = None
 stageJump = None
+stageSwing = None
+
+#action status
+in_jump = False
+in_duck = False
+in_swing = False
+
+#angle
+left_angle = None
+right_angle = None
+
+#other variables
+cap = cv2.VideoCapture(0)
+jump_height_queue = []
+prev_jump_height = None
 
 def calculate_angle(a,b,c):
-    a = np.array(a) # First
-    b = np.array(b) # Mid
-    c = np.array(c) # End
+    a = np.array(a) # First point of angle
+    b = np.array(b) # Mid point of angle
+    c = np.array(c) # End point of angle
     
     radians = np.arctan2(c[1]-b[1], c[0]-b[0]) - np.arctan2(a[1]-b[1], a[0]-b[0])
     angle = np.abs(radians*180.0/np.pi)
     
     if angle >180.0:
         angle = 360-angle
-        
     return angle 
 
-cap = cv2.VideoCapture(0)
-
-
-# Set the desired width and height
-new_width = 480
-new_height = 720
-
-if cap.isOpened():
-    # Get the current width and height of the video capture
-    current_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    current_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    # Set the new resolution
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, new_width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, new_height)
-
-
-## Setup mediapipe instance
 with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as pose:   
     while cap.isOpened():
+        
         ret, frame = cap.read()
         
+        #Crop the video capture: 
+        # frame = frame[0:720, 0:720]
+
         # Recolor image to RGB
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image.flags.writeable = False
@@ -79,47 +81,81 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             right_hip = [landmarks[23].x,landmarks[23].y]
             left_hip = [landmarks[24].x,landmarks[24].y]
 
+            #elbow 
+            right_elbow = [landmarks[13].x,landmarks[13].y]
+            left_elbow = [landmarks[14].x,landmarks[14].y]
 
-            #Get the distance between shoulder and hip 
-            hip_shoulder_distance = (right_shoulder[1] - right_hip[1] + left_shoulder[1] - left_hip[1]) / 2
+            #changing decimals to integer coordinates
+            right_shoulder_coords = [int(right_shoulder[0]*image_width), int(right_shoulder[1]*image_height)]
+            left_shoulder_coords = [int(left_shoulder[0]*image_width), int(left_shoulder[1]*image_height)]
+            right_hip_coords = [int(right_hip[0]*image_width), int(right_hip[1]*image_height)]
+            left_hip_coords = [int(left_hip[0]*image_width), int(left_hip[1]*image_height)]
+            right_elbow_coords = [int(right_elbow[0]*image_width), int(right_elbow[1]*image_height)]
+            left_elbow_coords = [int(left_elbow[0]*image_width), int(left_elbow[1]*image_height)]
 
-            ## Coordinates in the main image: 
-            right_shoulder_point = (int(right_shoulder[0] * image_width), int(right_shoulder[1] * image_height))
-            left_shoulder_point = (int(left_shoulder[0] * image_width), int(left_shoulder[1] * image_height))
+            #angle
+            left_angle = calculate_angle(left_elbow_coords, left_shoulder_coords, left_hip_coords)
+            right_angle = calculate_angle(right_elbow_coords, right_shoulder_coords, right_hip_coords)
+            print("left angle: " + str(left_angle) +  "\n")
+            print("right angle: " + str(right_angle) + "\n")
 
 
-            cv2.line(image, right_shoulder_point, left_shoulder_point, (255, 0, 0), 5)
-            print(right_shoulder[1])
-            shoulder_y_value.append(right_shoulder[1])
+            #averages
+            shoulder_average_height = int((right_shoulder_coords[1] + left_shoulder_coords[1])/2)
+            hip_average_height = int((right_hip_coords[1] + left_hip_coords[1])/2)
+            torsoCenter = [int((right_shoulder_coords[0]+left_shoulder_coords[0]+right_hip_coords[0]+left_hip_coords[0])/4),
+                           int((right_shoulder_coords[1]+left_shoulder_coords[1]+right_hip_coords[1]+left_hip_coords[1])/4)]
+
             
-
-
-
-            # Calculate angle
-            angle1 = calculate_angle(right_hip, right_knee, right_ankle) #angle to detect squat
-            #angle2 = calculate_angle(left_hip, left_knee, left_ankle) #angle to detect squat
-            angle3 = calculate_angle(right_elbow, right_shoulder, right_hip) #angle to detect jumping jacks 
-
-
-            ### LOGIC ###
-
-            # Logic for ducking
+            nextJumpHeight = int(shoulder_average_height + (shoulder_average_height-hip_average_height)/4)
             
+            #if the nextJumpHeight changes too quickly then we know that it is probably a jump
+            if len(jump_height_queue) > 6 and abs(nextJumpHeight - prev_jump_height) > (abs(shoulder_average_height-hip_average_height))/15:
+                #if its a jump then don't update nextJumpHeight
+                jump_height_queue.append(jump_height_queue[-5])
+                val = abs(nextJumpHeight - prev_jump_height)
+                v2 = abs(shoulder_average_height-hip_average_height)/7
+                print(str(val) + " " + str(v2) + " jumped so didn't update")
+            else:
+                jump_height_queue.append(nextJumpHeight)
+                print("didn't jump so it should move")
+            prev_jump_height = nextJumpHeight
 
-            #Logic for jumping
-            lastDistance = (shoulder_y_value[-1] - shoulder_y_value[-20])  #the distance for the last 10 pixel
-            if lastDistance > (hip_shoulder_distance * ratio): 
-                counterJump += 1
-            print(lastDistance)
+            #jump_height_queue.append(nextJumpHeight)
+            #manage the "jump height queue" that tells you the threshhold for jumping
+            if len(jump_height_queue) > 9 :
+                isJumpHeight = jump_height_queue[0]
+                jump_height_queue = jump_height_queue[1 : 9]
 
+            # isJumpHeight = int(sum(shoulderQueue)/len(shoulderQueue))
+            #needed height line
+            cv2.line(image, (0, isJumpHeight), (1080, isJumpHeight), (255,0,0), 2)
+            #shoulder line
+            cv2.line(image, (0, shoulder_average_height), (1080, shoulder_average_height), (255,0,0), 2)
+            # hip line
+            cv2.line(image, (0, hip_average_height), (1080, hip_average_height), (255,0,0), 2)
 
-            #Logic for swinging 
-        ### DEBUG 
-        #print(hip_shoulder_distance) 
+            #logic for a jump
+            if shoulder_average_height < isJumpHeight and in_jump == False:
+                counter_jump += 1
+                pyautogui.press('space')
+                in_jump = True
+            elif shoulder_average_height > isJumpHeight:
+                in_jump = False
+
+            #logic for a swing 
+            if right_angle > 120 and left_angle > 120 and in_swing == False:
+                counter_swing += 1
+                in_swing = True
+                pyautogui.press('right')
+            elif right_angle < 120 and left_angle < 120: 
+                in_swing = False 
+            
+            
         except:
             pass
         
-
+		
 
         ### DISPLAYING ###
         # Setup status box
@@ -128,27 +164,24 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
         # TEXT to display
         cv2.putText(image, 'DUCK', (15,12), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
-        cv2.putText(image, str(counterDuck), 
+        cv2.putText(image, str(counter_duck), 
                     (10,60), 
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 2, cv2.LINE_AA)
         
         cv2.putText(image, 'JUMP', (105,12), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
         
-        cv2.putText(image, str(counterJump), 
+        cv2.putText(image, str(counter_jump), 
                     (100,60), 
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 2, cv2.LINE_AA)
 
         cv2.putText(image, 'SWING', (195,12), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
         
-        cv2.putText(image, str(counterSwing), 
+        cv2.putText(image, str(counter_swing), 
                     (190,60), 
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 2, cv2.LINE_AA)
-
-        
-        
-        
+   
         # Render detections
         mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
                                 mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2), 
