@@ -57,7 +57,9 @@ class Camera:
         # other variables
         self.cap = cv2.VideoCapture(0)
         self.jump_height_queue = []
+        self.prev_jump_height_queue = []
         self.prev_jump_height = None
+
 
         self.mp_drawing = mp.solutions.drawing_utils
         self.mp_pose = mp.solutions.pose
@@ -272,11 +274,15 @@ class Camera:
                         + (shoulder_average_height - hip_average_height) / 4
                     )
 
+                    self.prev_jump_height_queue.append(next_jump_height)
+                    if(len(self.prev_jump_height_queue) > 4) :
+                        self.prev_jump_height_queue = self.prev_jump_height_queue[1:4]
+
                     # if the next_jump_height changes too quickly then we know that it is probably a jump
                     if (
                         len(self.jump_height_queue) > 6
-                        and abs(next_jump_height - self.prev_jump_height)
-                        > (abs(shoulder_average_height - hip_average_height)) / 100
+                        and abs(next_jump_height - self.prev_jump_height_queue[0])
+                        > (abs(shoulder_average_height - hip_average_height)) / 111
                     ):
                         # if its a jump then don't update next_jump_height
                         self.jump_height_queue.append(self.jump_height_queue[-5])
