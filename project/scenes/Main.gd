@@ -6,6 +6,8 @@ var eagle_scene = preload("res://scenes/bird.tscn")
 var obstacle_types = [croc_scene, spike_scene]
 var obstacles: Array
 var eagle_heights = [300, 420]
+var pybridge_scene = preload("res://scenes/pybridge.tscn")
+var pybridge = pybridge_scene.instantiate()
 
 const MONKEY_START_POS = Vector2i(150, 485)
 const CAM_START_POS = Vector2i(576, 284)
