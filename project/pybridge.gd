@@ -31,7 +31,19 @@ func _process(_delta):
 					process_pids.append_array(packet)
 				"KEY_INPUT":
 					print(packet)
-					# TODO: Implement functions to handle game inputs
+					if (packet != ""):
+						var input = InputEventKey.new()
+						if (packet == "s"):
+							input.keycode = KEY_S
+						elif (packet == "d"):
+							input.keycode = KEY_D
+						elif (packet == "space"):
+							input.keycode = KEY_SPACE
+							
+						input.pressed = true
+						Input.parse_input_event(input)
+						
+					
 		else:
 			push_error("Invalid type received!")
 
