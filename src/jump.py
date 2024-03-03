@@ -148,44 +148,49 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
                 ),
             ]
 
-            nextJumpHeight = int(
+            next_jump_height = int(
                 shoulder_average_height
                 + (shoulder_average_height - hip_average_height) / 4
             )
 
-            # if the nextJumpHeight changes too quickly then we know that it is probably a jump
+            # if the next_jump_height changes too quickly then we know that it is probably a jump
             if (
                 len(jump_height_queue) > 6
-                and abs(nextJumpHeight - prev_jump_height)
-                > (abs(shoulder_average_height - hip_average_height)) / 15
+                and abs(next_jump_height - prev_jump_height)
+                > (abs(shoulder_average_height - hip_average_height)) / 18
             ):
-                # if its a jump then don't update nextJumpHeight
+                # if its a jump then don't update next_jump_height
                 jump_height_queue.append(jump_height_queue[-5])
-                val = abs(nextJumpHeight - prev_jump_height)
-                v2 = abs(shoulder_average_height - hip_average_height) / 7
-                print(str(val) + " " + str(v2) + " jumped so didn't update")
+                # val = abs(next_jump_height - prev_jump_height)
+                # v2 = abs(shoulder_average_height - hip_average_height) / 18
+                # print(str(val) + " " + str(v2) + " jumped so didn't update")
             else:
-                jump_height_queue.append(nextJumpHeight)
-                print("didn't jump so it should move")
-            prev_jump_height = nextJumpHeight
+                jump_height_queue.append(next_jump_height)
+                # print("didn't jump so it should move")
+            prev_jump_height = next_jump_height
 
-            # jump_height_queue.append(nextJumpHeight)
+            # jump_height_queue.append(next_jump_height)
             # manage the "jump height queue" that tells you the threshhold for jumping
             if len(jump_height_queue) > 9:
-                isJumpHeight = jump_height_queue[0]
+                is_jump_height = jump_height_queue[0]
                 jump_height_queue = jump_height_queue[1:9]
 
-            # isJumpHeight = int(sum(shoulderQueue)/len(shoulderQueue))
-            # needed height line
-            cv2.line(image, (0, isJumpHeight), (1080, isJumpHeight), (255, 0, 0), 2)
+            is_duck_height = int(is_jump_height - (shoulder_average_height-hip_average_height)/2)
+            # is_jump_height = int(sum(shoulderQueue)/len(shoulderQueue))
+            # needed height jump line
+            cv2.line(image, (0, is_jump_height), (1080, is_jump_height), (255, 255, 255), 2)
+            # needed height duck line
+            cv2.line(image, (0, is_duck_height), (1080, is_duck_height), (255, 255, 255), 2)
+
             # shoulder line
             cv2.line(
                 image,
                 (0, shoulder_average_height),
                 (1080, shoulder_average_height),
-                (255, 0, 0),
+                (255,0,0),
                 2,
             )
+            
             # hip line
             cv2.line(
                 image,
@@ -196,20 +201,28 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             )
 
             # logic for a jump
-            if shoulder_average_height < isJumpHeight and in_jump == False:
+            if shoulder_average_height < is_jump_height and in_jump == False:
                 counter_jump += 1
-                pyautogui.press("space")
+                pyautogui.press('space')
                 in_jump = True
-            elif shoulder_average_height > isJumpHeight:
+            elif shoulder_average_height > is_jump_height:
                 in_jump = False
 
             # logic for a swing
             if right_angle > 120 and left_angle > 120 and in_swing == False:
                 counter_swing += 1
                 in_swing = True
-                pyautogui.press("right")
+                pyautogui.press('s')
             elif right_angle < 120 and left_angle < 120:
                 in_swing = False
+            
+        
+            if shoulder_average_height < is_duck_height and in_duck == False:
+                counter_duck += 1
+                in_duck = True
+                pyautogui.press('d')
+            elif shoulder_average_height > is_duck_height and in_duck == True:
+                in_duck = False
 
         except:
             pass
