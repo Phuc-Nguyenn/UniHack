@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 const SPEED = 400.0
-const JUMP_VELOCITY = -1300.0
+const JUMP_VELOCITY = -1150.0
 const GRAVITY = 3500
 
 var swinging = false

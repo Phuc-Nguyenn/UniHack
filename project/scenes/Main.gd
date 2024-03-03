@@ -28,11 +28,8 @@ var obs_timeout = 5
 var difficulty = 0
 var max_difficulty = 2.5
 
-
 const START_SPEED = 10.0
 const MAX_SPEED = 25
-
-
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -105,7 +102,6 @@ func _process(delta):
 
 func show_score():
 	$scoredisplay.get_node("scorelabel").text = "SCORE: " + str(score)
-	
 
 func generate_obstacle():
 	# if obstacles.is_empty() or last_obstacle.position.x < distance + randi_range(300, 500):
@@ -125,7 +121,9 @@ func generate_obstacle():
 		obs_y = screen_size.y - ground_height - (obs_height * obs_scale.y / 2) + 5
 	
 	if index == Obstacles.SpikesLong:
+		# make spikes position lower by a small amount so that sinwging over them is not impossible
 		obs_y += 30
+		# Create the vine
 		var vine_obs = vine_scene.instantiate()
 		var vine_obs_x = screen_size.x + distance
 		var vine_obs_y = -200
@@ -135,14 +133,9 @@ func generate_obstacle():
 	add_obs(obs, obs_x, obs_y, false)
 	last_obs_time = obs_timeout
 
-
 func add_obs(obs, x, y, swingable):
 	obs.position = Vector2i(x, y)
-	if swingable:
-		#obs.body_entered.connect(swing_obs)
-		#obs.body_exited.connect(not_swing_obs)
-		swingable
-	else:
+	if !swingable:
 		obs.body_entered.connect(hit_obs)
 	add_child(obs)
 	obstacles.append(obs)
@@ -150,14 +143,6 @@ func add_obs(obs, x, y, swingable):
 func hit_obs(body):
 	if body.name == "Monkey":
 		game_over()
-
-func swing_obs(body):
-	if body.name == "Monkey":
-		body.canSwing()
-		
-func not_swing_obs(body):
-	if body.name == "Monkey":
-		body.cannotSwing()
 
 func game_over():
 	get_tree().paused = true
