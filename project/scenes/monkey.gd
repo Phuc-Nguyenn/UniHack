@@ -26,7 +26,6 @@ func _physics_process(delta):
 			$"Running-CollisionShape2D".disabled = true
 		else:
 			$AnimatedSprite2D.play("running")
-		
 
 	# Get the input direction and handle the movement/deceleration.
 	# As good practice, you should replace UI actions with custom gameplay actions.

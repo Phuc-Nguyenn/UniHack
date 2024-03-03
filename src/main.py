@@ -3,19 +3,20 @@ import json
 import os
 import socket
 
+import camera
+
 UDP_IP = "127.0.0.1"
 UDP_PORT = 50505
 
 key_inputs = [
-    "w",
-    "a",
+    "space",
     "s",
     "d",
 ]
 
 
 class SocketConn:
-    def __init__(self, sock) -> None:
+    def __init__(self) -> None:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def put_packet(self, packet):
@@ -35,7 +36,9 @@ def main():
     for key in key_inputs:
         keyboard.add_hotkey(key, lambda: conn.on_input(key))
 
-    keyboard.wait()
+    # Hook into camera
+    cam = camera.Camera()
+    cam.loop()
 
 
 if __name__ == "__main__":
