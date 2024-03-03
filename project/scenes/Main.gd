@@ -5,6 +5,7 @@ var spike_scene = preload("res://scenes/spikes.tscn")
 var eagle_scene = preload("res://scenes/bird.tscn")
 var vine_scene = preload("res://scenes/vine.tscn")
 var spikes_long_scene = preload("res://scenes/spikes_long.tscn")
+
 var obstacle_types = [spikes_long_scene, croc_scene, spike_scene, eagle_scene]
 enum Obstacles {SpikesLong, Croc, Spike, Eagle}
 

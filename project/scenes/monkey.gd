@@ -22,14 +22,14 @@ func updateSwingPos(pos, completionRatio):
 func _physics_process(delta):
 	# Add the gravity.
 	if not is_on_floor():
-		if waiting and Input.is_key_pressed(KEY_S):
+		if waiting and Input.is_action_pressed("ui_down"):
 			swinging = true
 			$AnimatedSprite2D.play("swinging")
 			velocity.y = -JUMP_VELOCITY*0.4
 			waiting = false
 			
 		if swinging == true:
-			if Input.is_key_pressed(KEY_S):
+			if Input.is_action_pressed("ui_down"):
 				velocity.y -= GRAVITY*0.4 * delta
 			else:
 				cannotSwing()
@@ -43,20 +43,12 @@ func _physics_process(delta):
 			velocity.y = JUMP_VELOCITY
 			$AnimatedSprite2D.play("jumping")
 		
-		elif Input.is_key_pressed(KEY_D):
+		elif Input.is_action_pressed("ui_right"):
 			$AnimatedSprite2D.play("ducking")
 			$"Running-CollisionShape2D".disabled = true
 		else:
 			$AnimatedSprite2D.play("running")
-
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
-	var direction = Input.get_axis("ui_left", "ui_right")
-	if direction:
-		velocity.x = direction * SPEED
-	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
-
+	
 	move_and_slide()
 
 func canSwing():

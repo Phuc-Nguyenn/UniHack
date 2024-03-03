@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bca3ksatj4dql"]
+[gd_scene load_steps=8 format=3 uid="uid://bca3ksatj4dql"]
 
 [ext_resource type="Script" path="res://scenes/Main.gd" id="1_3l1xk"]
 [ext_resource type="PackedScene" uid="uid://b12s7gqpkancb" path="res://scenes/background.tscn" id="1_qcygb"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://wxge2retj3f2" path="res://scenes/monkey.tscn" id="3_bcemo"]
 [ext_resource type="PackedScene" uid="uid://ws5ge1n1sr2o" path="res://scenes/scoredisplay.tscn" id="5_s8hxq"]
 [ext_resource type="PackedScene" uid="uid://ccae63rb6t2or" path="res://scenes/game_over.tscn" id="6_34jdx"]
+[ext_resource type="PackedScene" uid="uid://c4idmfj8r0o0h" path="res://scenes/server_test.tscn" id="7_tsbrf"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_3l1xk")
@@ -24,3 +25,5 @@ position = Vector2(576, 324)
 
 [node name="GameOver" parent="." instance=ExtResource("6_34jdx")]
 process_mode = 2
+
+[node name="ServerNode" parent="." instance=ExtResource("7_tsbrf")]
