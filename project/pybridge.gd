@@ -34,7 +34,7 @@ func _process(_delta):
 					# TODO: Implement functions to handle game inputs
 					if (packet != ""):
 						var input = InputEventKey.new()
-						if (packet == 's'):
+						if (packet == "s"):
 							input.keycode = KEY_S
 						elif (packet == "d"):
 							input.keycode = KEY_D
