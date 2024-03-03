@@ -31,7 +31,6 @@ func _process(_delta):
 					process_pids.append_array(packet)
 				"KEY_INPUT":
 					print(packet)
-					# TODO: Implement functions to handle game inputs
 					if (packet != ""):
 						var input = InputEventKey.new()
 						if (packet == "s"):
