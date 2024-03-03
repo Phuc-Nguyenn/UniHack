@@ -13,6 +13,7 @@ key_inputs = [
     "d",
 ]
 
+
 class SocketConn:
     def __init__(self, sock) -> None:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
