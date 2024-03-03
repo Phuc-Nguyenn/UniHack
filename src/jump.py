@@ -203,7 +203,7 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             # logic for a jump
             if shoulder_average_height < is_jump_height and in_jump == False:
                 counter_jump += 1
-                pyautogui.press('space')
+                pyautogui.press("space")
                 in_jump = True
             elif shoulder_average_height > is_jump_height:
                 in_jump = False
@@ -212,7 +212,7 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             if right_angle > 120 and left_angle > 120 and in_swing == False:
                 counter_swing += 1
                 in_swing = True
-                pyautogui.press('s')
+                pyautogui.press("s")
             elif right_angle < 120 and left_angle < 120:
                 in_swing = False
             
@@ -220,7 +220,7 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             if shoulder_average_height < is_duck_height and in_duck == False:
                 counter_duck += 1
                 in_duck = True
-                pyautogui.press('d')
+                pyautogui.press("d")
             elif shoulder_average_height > is_duck_height and in_duck == True:
                 in_duck = False
 
