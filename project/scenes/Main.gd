@@ -3,7 +3,11 @@ extends Node
 var croc_scene = preload("res://scenes/crocodile.tscn")
 var spike_scene = preload("res://scenes/spikes.tscn")
 var eagle_scene = preload("res://scenes/bird.tscn")
-var obstacle_types = [croc_scene, spike_scene]
+var vine_scene = preload("res://scenes/vine.tscn")
+var spikes_long_scene = preload("res://scenes/spikes_long.tscn")
+var obstacle_types = [spikes_long_scene, croc_scene, spike_scene, eagle_scene]
+enum Obstacles {SpikesLong, Croc, Spike, Eagle}
+
 var obstacles: Array
 var eagle_heights = [300, 420]
 
@@ -24,11 +28,8 @@ var obs_timeout = 5
 var difficulty = 0
 var max_difficulty = 2.5
 
-
 const START_SPEED = 10.0
 const MAX_SPEED = 25
-
-
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -101,38 +102,47 @@ func _process(delta):
 
 func show_score():
 	$scoredisplay.get_node("scorelabel").text = "SCORE: " + str(score)
-	
 
 func generate_obstacle():
 	# if obstacles.is_empty() or last_obstacle.position.x < distance + randi_range(300, 500):
-		var obstacle_type = obstacle_types[randi() % obstacle_types.size()]
-		var obs = obstacle_type.instantiate()
+	# Only generate eagles (the last element in the obstacles array) if difficulty is bigger than zero
+	var index = randi() % obstacle_types.size() if difficulty > 0 else randi() % (obstacle_types.size() - 1)
+	var obstacle_type = obstacle_types[index]
+	var obs = obstacle_type.instantiate()
+	var obs_x = screen_size.x + distance + 100
+	var obs_y
+	
+	# Handle eagle y-position
+	if index == Obstacles.Eagle:
+		obs_y = eagle_heights[randi() % eagle_heights.size()]
+	else:
 		var obs_height = obs.get_node("Sprite2D").texture.get_height()
 		var obs_scale = obs.get_node("Sprite2D").scale
-		var obs_x = screen_size.x + distance + 100
-		var obs_y = screen_size.y - ground_height - (obs_height * obs_scale.y / 2) + 5
-		# obs.position = Vector2i(obs_x, obs_y)
-		last_obstacle = obs
-		add_obs(obs, obs_x, obs_y)
-		last_obs_time = obs_timeout
-		
-		if difficulty > 0:
-			if (randi() % 2) == 0:
-				obs = eagle_scene.instantiate()
-				obs_x = screen_size.x + distance + 100
-				obs_y = eagle_heights[randi() % eagle_heights.size()]
-				add_obs(obs, obs_x, obs_y)
-		
-func add_obs(obs, x, y):
+		obs_y = screen_size.y - ground_height - (obs_height * obs_scale.y / 2) + 5
+	
+	if index == Obstacles.SpikesLong:
+		# make spikes position lower by a small amount so that sinwging over them is not impossible
+		obs_y += 30
+		# Create the vine
+		var vine_obs = vine_scene.instantiate()
+		var vine_obs_x = screen_size.x + distance
+		var vine_obs_y = -200
+		add_obs(vine_obs, vine_obs_x, vine_obs_y, true)
+	
+	last_obstacle = obs
+	add_obs(obs, obs_x, obs_y, false)
+	last_obs_time = obs_timeout
+
+func add_obs(obs, x, y, swingable):
 	obs.position = Vector2i(x, y)
-	obs.body_entered.connect(hit_obs)
+	if !swingable:
+		obs.body_entered.connect(hit_obs)
 	add_child(obs)
 	obstacles.append(obs)
 	
 func hit_obs(body):
 	if body.name == "Monkey":
 		game_over()
-		
 
 func game_over():
 	get_tree().paused = true
