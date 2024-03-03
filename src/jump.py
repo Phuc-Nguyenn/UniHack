@@ -157,7 +157,7 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             if (
                 len(jump_height_queue) > 6
                 and abs(next_jump_height - prev_jump_height)
-                > (abs(shoulder_average_height - hip_average_height)) / 18
+                > (abs(shoulder_average_height - hip_average_height)) / 100
             ):
                 # if its a jump then don't update next_jump_height
                 jump_height_queue.append(jump_height_queue[-5])
