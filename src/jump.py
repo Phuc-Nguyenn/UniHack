@@ -30,6 +30,7 @@ right_angle = None
 # other variables
 cap = cv2.VideoCapture(0)
 jump_height_queue = []
+prev_jump_height_queue = []
 prev_jump_height = None
 
 
@@ -152,12 +153,15 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
                 shoulder_average_height
                 + (shoulder_average_height - hip_average_height) / 4
             )
+            prev_jump_height_queue.append(next_jump_height)
+            if(len(prev_jump_height_queue) > 4) :
+                prev_jump_height_queue = prev_jump_height_queue[1:4]
 
             # if the next_jump_height changes too quickly then we know that it is probably a jump
             if (
                 len(jump_height_queue) > 6
-                and abs(next_jump_height - prev_jump_height)
-                > (abs(shoulder_average_height - hip_average_height)) / 100
+                and abs(next_jump_height - prev_jump_height_queue[0])
+                > (abs(shoulder_average_height - hip_average_height)) / 111
             ):
                 # if its a jump then don't update next_jump_height
                 jump_height_queue.append(jump_height_queue[-5])
@@ -167,6 +171,7 @@ with mp_pose.Pose(min_detection_confidence=0.4, min_tracking_confidence=0.4) as 
             else:
                 jump_height_queue.append(next_jump_height)
                 # print("didn't jump so it should move")
+            
             prev_jump_height = next_jump_height
 
             # jump_height_queue.append(next_jump_height)
