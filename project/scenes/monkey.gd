@@ -43,7 +43,7 @@ func _physics_process(delta):
 			velocity.y = JUMP_VELOCITY
 			$AnimatedSprite2D.play("jumping")
 		
-		elif Input.is_action_pressed("ui_down"):
+		elif Input.is_key_pressed(KEY_D):
 			$AnimatedSprite2D.play("ducking")
 			$"Running-CollisionShape2D".disabled = true
 		else:
