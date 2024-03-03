@@ -16,6 +16,7 @@ func _ready():
 
 
 func _process(_delta):
+	print("bridge")
 	server.poll()
 	if server.is_connection_available():
 		var peer := server.take_connection()
